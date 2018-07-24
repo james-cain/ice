@@ -1,8 +1,7 @@
 /**
  * 定义应用路
  */
-import { HashRouter as Router } from 'react-router-dom';
-import { Switch, Route } from 'react-router';
+import { Switch, Route, HashRouter as Router } from 'react-router-dom';
 import React from 'react';
 
 import routerConfig from './routerConfig';
@@ -50,7 +49,7 @@ function renderRouterConfigV4(container, router, contextPath) {
     if (!routeItem.path) {
       // eslint-disable-next-line
       console.error('route must has `path`');
-    } else if (routeItem.path == '/' || routeItem.path == '*') {
+    } else if (routeItem.path === '/' || routeItem.path === '*') {
       routePath = routeItem.path;
     } else {
       routePath = `/${routeContextPath}/${routeItem.path}`.replace(/\/+/g, '/');

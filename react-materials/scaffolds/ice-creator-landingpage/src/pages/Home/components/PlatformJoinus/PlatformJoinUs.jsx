@@ -1,17 +1,12 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Button } from '@icedesign/base';
 
 export default class PlatformJoinUs extends Component {
   static displayName = 'PlatformJoinUs';
 
-  static propTypes = {
-    value: PropTypes.string,
-  };
+  static propTypes = {};
 
-  static defaultProps = {
-    value: 'string data',
-  };
+  static defaultProps = {};
 
   constructor(props) {
     super(props);
@@ -23,8 +18,7 @@ export default class PlatformJoinUs extends Component {
       <div
         style={{
           ...styles.wrapper,
-          backgroundImage:
-            'url(https://img.alicdn.com/tfs/TB1Iw2ZRVXXXXb4aFXXXXXXXXXX-2760-1544.png)',
+          backgroundImage: `url(${require('./images/TB1Iw2ZRVXXXXb4aFXXXXXXXXXX-2760-1544.png')})`,
         }}
       >
         <div>
@@ -35,20 +29,10 @@ export default class PlatformJoinUs extends Component {
             </p>
           </div>
           <div style={styles.buttons}>
-            <Button
-              style={styles.secondaryButton}
-              type="normal"
-              component="a"
-              href="your-url"
-            >
+            <Button style={styles.secondaryButton} type="normal">
               开通
             </Button>
-            <Button
-              style={styles.primaryButton}
-              type="primary"
-              component="a"
-              href="your-url"
-            >
+            <Button style={styles.primaryButton} type="primary">
               登录
             </Button>
           </div>

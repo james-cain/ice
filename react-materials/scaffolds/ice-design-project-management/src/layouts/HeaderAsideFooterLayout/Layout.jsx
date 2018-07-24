@@ -70,6 +70,7 @@ export default class HeaderAsideFooterResponsiveLayout extends Component {
                     return (
                       <SubMenu
                         key={index}
+                        className="custom-menu-sub-menu"
                         title={
                           <div className="custom-menu-item">
                             {nav.icon ? (
@@ -114,7 +115,7 @@ export default class HeaderAsideFooterResponsiveLayout extends Component {
                     linkProps.to = nav.path;
                   }
                   return (
-                    <MenuItem key={nav.path}>
+                    <MenuItem key={nav.path} className="custom-menu-sub-menu">
                       <Link {...linkProps}>
                         <div className="custom-menu-item">
                           {nav.icon ? (
@@ -142,7 +143,7 @@ export default class HeaderAsideFooterResponsiveLayout extends Component {
                     width: '42px',
                     height: '42px',
                   }}
-                  src="https://img.alicdn.com/tfs/TB1EchcpeuSBuNjy1XcXXcYjFXa-200-200.png"
+                  src={require('./images/TB1EchcpeuSBuNjy1XcXXcYjFXa-200-200.png')}
                   alt=""
                 />
               </div>

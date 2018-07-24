@@ -1,9 +1,14 @@
 const oss = require('ali-oss');
 const co = require('co');
-const { readdirSync } = require('fs');
+const { readdirSync, readFileSync, writeFile } = require('fs');
 const { resolve, join } = require('path');
+const scaffolds = require('./scaffolds');
 
-if (process.env.TRAVIS_BRANCH !== 'master') {
+if (
+  process.env.TRAVIS_BRANCH !== 'master' &&
+  process.env.TRAVIS_BRANCH !== 'beta' &&
+  process.env.TRAVIS_BRANCH !== 'pre-depoly'
+) {
   console.log('当前分支非 Master, 不执行物料源同步脚本');
   console.log('TRAVIS_BRANCH=' + process.env.TRAVIS_BRANCH);
   process.exit(0);
@@ -21,14 +26,71 @@ const store = oss({
   time: '120s',
 });
 
+const assetsMap = {
+  "pre-depoly": "pre-assets",
+  "beta": "beta-assets",
+  "master": "assets"
+}
+
 console.log('start uploading');
-const files = readdirSync(resolve(__dirname, '../build')).map((filename) => ({
-  from: resolve(__dirname, '../build', filename),
-  to: join('assets', filename),
-}));
+sortScaffoldMaterials()
+  .then((res) => {
+    const files = readdirSync(resolve(__dirname, '../build')).map(
+      (filename) => ({
+        from: resolve(__dirname, '../build', filename),
+        to:  join(assetsMap[process.env.TRAVIS_BRANCH], filename),
+      })
+    );
 
-console.log(files);
+    const tasks = files.map(createUploadTask);
 
+    Promise.all(tasks)
+      .then(() => {
+        console.log('All Done');
+      })
+      .catch((err) => {
+        console.log('upload err', err);
+      });
+  })
+  .catch((err) => {
+    console.log('sort err', err);
+  });
+
+/**
+ * 按照下载量进行排序推荐
+ */
+function sortScaffoldMaterials() {
+  return new Promise((resolve, reject) => {
+    const materialsPath = join(__dirname, '../build', 'react-materials.json');
+    const materialsData = JSON.parse(readFileSync(materialsPath, 'utf-8'));
+
+    const sortMaterialsData = [];
+    scaffolds.forEach((scaffold) => {
+      materialsData.scaffolds.forEach((currentItem) => {
+        if (currentItem.name === scaffold) {
+          sortMaterialsData.push(currentItem);
+        }
+      });
+    });
+
+    materialsData.scaffolds = sortMaterialsData;
+
+    return writeFile(
+      materialsPath,
+      JSON.stringify(materialsData, null, 2),
+      'utf-8',
+      (err) => {
+        if (err) reject(err);
+        resolve();
+      }
+    );
+  });
+}
+
+/**
+ * 上传任务
+ * @param {object} opts
+ */
 function createUploadTask(opts) {
   const { from, to } = opts;
 
@@ -41,13 +103,3 @@ function createUploadTask(opts) {
     }
   });
 }
-
-const tasks = files.map(createUploadTask);
-
-Promise.all(tasks)
-  .then(() => {
-    console.log('All Done');
-  })
-  .catch((err) => {
-    console.log('upload err', err);
-  });

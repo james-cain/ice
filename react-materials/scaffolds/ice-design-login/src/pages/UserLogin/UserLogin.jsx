@@ -22,7 +22,7 @@ export default class UserLogin extends Component {
     super(props);
     this.state = {
       value: {
-        account: '',
+        name: '',
         password: '',
         checkbox: false,
       },
@@ -62,16 +62,12 @@ export default class UserLogin extends Component {
               <Row className="formItem">
                 <Col className="formItemCol">
                   <IceIcon type="person" size="small" className="inputIcon" />
-                  <IceFormBinder name="account" required message="必填">
-                    <Input
-                      size="large"
-                      maxLength={20}
-                      placeholder="管理员账号"
-                    />
+                  <IceFormBinder name="name" required message="必填">
+                    <Input size="large" maxLength={20} placeholder="用户名" />
                   </IceFormBinder>
                 </Col>
                 <Col>
-                  <IceFormError name="account" />
+                  <IceFormError name="name" />
                 </Col>
               </Row>
 
@@ -110,13 +106,13 @@ export default class UserLogin extends Component {
               </Row>
 
               <Row className="tips">
-                <Link to="/register" className="link">
+                <Link to="/register" className="tips-text">
                   立即注册
                 </Link>
                 <span className="line">|</span>
-                <a href="/" className="link">
+                <Link to="/forgetpassword" className="tips-text">
                   忘记密码
-                </a>
+                </Link>
               </Row>
             </div>
           </IceFormBinderWrapper>

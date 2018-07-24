@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router';
 import IceContainer from '@icedesign/container';
 import './BasicException.scss';
 
@@ -11,7 +10,7 @@ export default class BasicException extends Component {
         <IceContainer>
           <div style={styles.exceptionContent} className="exception-content">
             <img
-              src="https://img.alicdn.com/tfs/TB1w4M7bNrI8KJjy0FpXXb5hVXa-260-260.png"
+              src={require('./images/TB1w4M7bNrI8KJjy0FpXXb5hVXa-260-260.png')}
               style={styles.imgException}
               className="imgException"
               alt="服务器出错"
@@ -21,7 +20,7 @@ export default class BasicException extends Component {
                 抱歉，服务器出错了
               </h3>
               <p style={styles.description} className="description">
-                服务器出错了，请重新刷新页面或返回<Link to="/">首页</Link>
+                服务器出错了，请重新刷新页面或返回<a href="#">首页</a>
               </p>
             </div>
           </div>

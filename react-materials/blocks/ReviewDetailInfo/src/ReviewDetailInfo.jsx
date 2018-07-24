@@ -63,13 +63,12 @@ export default class ReviewDetailInfo extends Component {
           <IceContainer style={styles.container} title="邀评排行">
             <div style={styles.reviewLeaderboard}>
               <div style={styles.reviewLeaderboardItem}>
-                <span style={styles.reviewLeaderboardItemRank}>1</span>
                 <span style={styles.reviewLeaderboardItemAvatar}>
                   <img
                     style={styles.reviewLeaderboardItemAvatarImg}
                     width="40"
                     height="40"
-                    src="https://img.alicdn.com/tfs/TB1j159r21TBuNjy0FjXXajyXXa-499-498.png_80x80.jpg"
+                    src={require('./images/TB1j159r21TBuNjy0FjXXajyXXa-499-498.png_80x80.jpg')}
                     alt=""
                   />
                 </span>
@@ -77,13 +76,12 @@ export default class ReviewDetailInfo extends Component {
                 <span style={styles.reviewLeaderboardItemCount}>912 份</span>
               </div>
               <div style={styles.reviewLeaderboardItem}>
-                <span style={styles.reviewLeaderboardItemRank}>2</span>
                 <span style={styles.reviewLeaderboardItemAvatar}>
                   <img
                     style={styles.reviewLeaderboardItemAvatarImg}
                     width="40"
                     height="40"
-                    src="https://img.alicdn.com/tfs/TB1Daimr1SSBuNjy0FlXXbBpVXa-499-498.png_80x80.jpg"
+                    src={require('./images/TB1Daimr1SSBuNjy0FlXXbBpVXa-499-498.png_80x80.jpg')}
                     alt=""
                   />
                 </span>
@@ -91,13 +89,12 @@ export default class ReviewDetailInfo extends Component {
                 <span style={styles.reviewLeaderboardItemCount}>675 份</span>
               </div>
               <div style={styles.reviewLeaderboardItem}>
-                <span style={styles.reviewLeaderboardItemRank}>3</span>
                 <span style={styles.reviewLeaderboardItemAvatar}>
                   <img
                     style={styles.reviewLeaderboardItemAvatarImg}
                     width="40"
                     height="40"
-                    src="https://img.alicdn.com/tfs/TB1FGimr1SSBuNjy0FlXXbBpVXa-499-498.png_80x80.jpg"
+                    src={require('./images/TB1FGimr1SSBuNjy0FlXXbBpVXa-499-498.png_80x80.jpg')}
                     alt=""
                   />
                 </span>
@@ -105,13 +102,12 @@ export default class ReviewDetailInfo extends Component {
                 <span style={styles.reviewLeaderboardItemCount}>588 份</span>
               </div>
               <div style={styles.reviewLeaderboardItem}>
-                <span style={styles.reviewLeaderboardItemRank}>4</span>
                 <span style={styles.reviewLeaderboardItemAvatar}>
                   <img
                     style={styles.reviewLeaderboardItemAvatarImg}
                     width="40"
                     height="40"
-                    src="https://img.alicdn.com/tfs/TB1AdOerVOWBuNjy0FiXXXFxVXa-499-498.png_80x80.jpg"
+                    src={require('./images/TB1AdOerVOWBuNjy0FiXXXFxVXa-499-498.png_80x80.jpg')}
                     alt=""
                   />
                 </span>
@@ -119,13 +115,12 @@ export default class ReviewDetailInfo extends Component {
                 <span style={styles.reviewLeaderboardItemCount}>462 份</span>
               </div>
               <div style={styles.reviewLeaderboardItem}>
-                <span style={styles.reviewLeaderboardItemRank}>5</span>
                 <span style={styles.reviewLeaderboardItemAvatar}>
                   <img
                     style={styles.reviewLeaderboardItemAvatarImg}
                     width="40"
                     height="40"
-                    src="https://img.alicdn.com/tfs/TB1FWimr1SSBuNjy0FlXXbBpVXa-499-498.png_80x80.jpg"
+                    src={require('./images/TB1FWimr1SSBuNjy0FlXXbBpVXa-499-498.png_80x80.jpg')}
                     alt=""
                   />
                 </span>
@@ -207,22 +202,11 @@ const styles = {
     justifyContent: 'space-between',
   },
   reviewLeaderboardItemAvatar: {
-    borderRadius: '50%',
-    overflow: 'hidden',
-    display: 'inline-block',
     marginRight: 15,
   },
   reviewLeaderboardItemAvatarImg: {
+    borderRadius: '50%',
     display: 'block',
-  },
-  reviewLeaderboardItemRank: {
-    position: 'absolute',
-    left: 0,
-    width: 40,
-    height: 40,
-    textAlign: 'center',
-    lineHeight: '40px',
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   reviewLeaderboardItemName: {
     flex: 1,
