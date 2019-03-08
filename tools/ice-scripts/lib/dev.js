@@ -1,12 +1,11 @@
 /**
- * 启动服务，根据传入的路径地址，按照 ICE page 的格则搜寻代码，并启动编译服务
+ * 启动服务，根据传入的路径地址，按照 ICE page 的规则搜寻代码，并启动编译服务
  * @param {String} cwd 项目目录
  * @param {Object} options 命令行参数
  */
-
+/* eslint no-console:off */
 process.env.NODE_ENV = 'development';
 
-const address = require('address');
 const chalk = require('chalk');
 const fs = require('fs');
 const clearConsole = require('react-dev-utils/clearConsole');
@@ -15,21 +14,25 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const deepmerge = require('deepmerge');
 
-const getPaths = require('./config/paths');
+const paths = require('./config/paths');
 const getEntries = require('./config/getEntry');
 const getWebpackConfigDev = require('./config/webpack.config.dev');
 const devMiddleware = require('./devMiddleware');
-// const npmUpdate = require('./helpers/npmUpdate');
 const iceworksClient = require('./iceworksClient');
 const generateRootCA = require('./config/generateRootCA');
-
-/* eslint no-console:off */
+const prepareUrLs = require('./utils/prepareURLs');
+const getProxyConfig = require('./config/getProxyConfig');
+const openBrowser = require('react-dev-utils/openBrowser');
+const goldlog = require('./utils/goldlog');
+const pkgData = require('../package.json');
 
 module.exports = async function(args, subprocess) {
-  const cwd = process.cwd();
-  const HOST = args.host || '0.0.0.0';
-  const PORT = args.port || 4444;
-  let protocol = args.https ? 'https' : 'http';
+  goldlog('version', {
+    version: pkgData.version
+  });
+  goldlog('dev');
+
+  // 与 iceworks 客户端通信
   const send = function(data) {
     iceworksClient.send(data);
     if (subprocess && typeof subprocess.send === 'function') {
@@ -37,21 +40,40 @@ module.exports = async function(args, subprocess) {
     }
   };
 
-  const LOCAL_IP = address.ip();
+  const cwd = process.cwd();
+  const HOST = args.host || '0.0.0.0';
+  const PORT = args.port || 4444;
+  let httpsConfig;
+  let protocol = args.https ? 'https' : 'http';
+
+  if (protocol == 'https') {
+    try {
+      const ca = await generateRootCA();
+      httpsConfig = {
+        key: fs.readFileSync(ca.key),
+        cert: fs.readFileSync(ca.cert),
+      };
+    } catch (err) {
+      protocol = 'http';
+      console.log(chalk.red('HTTPS 证书生成失败，已转换为HTTP'));
+    }
+  }
 
   const isInteractive = false; // process.stdout.isTTY;
+  const urls = prepareUrLs(protocol, HOST, PORT);
   const entries = getEntries(cwd);
-  const paths = getPaths(cwd);
-
+  const proxyConfig = getProxyConfig();
+  // eslint-disable-next-line import/no-dynamic-require
   const packageData = require(paths.appPackageJson);
   // get ice config by package.ice
 
-  const webpackConfig = getWebpackConfigDev(
-    entries,
-    paths,
-    packageData.buildConfig || packageData.ice,
-    packageData.themeConfig
-  );
+  if (process.env.DISABLED_RELOAD) {
+    console.log(chalk.yellow('Warn:'), '关闭了热更新（hot-reload）功能');
+  }
+  const webpackConfig = getWebpackConfigDev({
+    entry: entries,
+    buildConfig: packageData.buildConfig || packageData.ice,
+  });
 
   if (iceworksClient.available) {
     webpackConfig.plugins.push(
@@ -72,36 +94,24 @@ module.exports = async function(args, subprocess) {
   let isFirstCompile = true;
   const compiler = webpack(webpackConfig);
   // eslint-disable-next-line global-require
-  let devServerConfig = require('./config/webpack.server.config')(paths, args);
+  let devServerConfig = require('./config/webpack.server.config')(args);
   if ('devServer' in webpackConfig) {
     // merge user config
     devServerConfig = deepmerge(devServerConfig, webpackConfig.devServer);
   }
 
-  // buffer与deepmerge有冲突，会被解析成乱码
-  if (protocol === 'https') {
-    try {
-      const ca = await generateRootCA();
-      devServerConfig.https = {
-        key: fs.readFileSync(ca.key),
-        cert: fs.readFileSync(ca.cert),
-      };
-      console.log(
-        chalk.green('当前使用的 HTTPS 证书路径(如有需要请手动信任此文件)')
-      );
-      console.log(chalk.green(ca.cert));
-    } catch (err) {
-      protocol = 'http';
-      delete devServerConfig.https;
-      console.log(chalk.red('HTTPS 证书生成失败，已转换为HTTP'));
-    }
+  // buffer 与 deepmerge有冲突，会被解析成乱码
+  if (httpsConfig) {
+    devServerConfig.https = httpsConfig;
+  } else {
+    delete devServerConfig.https;
   }
 
   const devServer = new WebpackDevServer(compiler, devServerConfig);
 
-  devMiddleware(devServer.app);
+  devMiddleware(devServer.app, proxyConfig);
 
-  compiler.plugin('done', (stats) => {
+  compiler.hooks.done.tap('done', (stats) => {
     if (isInteractive) {
       clearConsole();
     }
@@ -111,14 +121,19 @@ module.exports = async function(args, subprocess) {
         message: 'server_finished',
         data: {
           statusDev: 'working',
-          serverUrl: `${protocol}://${LOCAL_IP}:${PORT}`,
+          serverUrl: urls.localUrlForTerminal,
         },
       });
 
       isFirstCompile = false;
       console.log(chalk.cyan('Starting the development server...'));
-      console.log('   ', chalk.yellow(`${protocol}://localhost:${PORT}`));
-      console.log('   ', chalk.yellow(`${protocol}://${LOCAL_IP}:${PORT}`));
+      console.log(
+        [
+          `    - Local:   ${chalk.yellow(urls.localUrlForTerminal)}`,
+          `    - Network: ${chalk.yellow(urls.lanUrlForTerminal)}`,
+        ].join('\n')
+      );
+      openBrowser(urls.localUrlForBrowser);
     }
 
     console.log(
@@ -182,7 +197,7 @@ module.exports = async function(args, subprocess) {
         message: 'compiler_success',
         data: {
           statusCompile: 'success',
-          serverUrl: `${protocol}://${LOCAL_IP}:${PORT}`,
+          serverUrl: urls.lanUrlForBrowser || urls.localUrlForBrowser,
         },
       });
     } else {
@@ -192,13 +207,13 @@ module.exports = async function(args, subprocess) {
         message: 'compiler_failed',
         data: {
           statusCompile: 'failed',
-          serverUrl: `${protocol}://${LOCAL_IP}:${PORT}`,
+          serverUrl: urls.lanUrlForBrowser || urls.localUrlForBrowser,
         },
       });
     }
   });
 
-  compiler.plugin('invalid', () => {
+  compiler.hooks.invalid.tap('invalid', () => {
     if (isInteractive) {
       clearConsole();
     }
@@ -212,7 +227,7 @@ module.exports = async function(args, subprocess) {
     });
   });
 
-  devServer.use(function(req, res, next) {
+  devServer.use((req, res, next) => {
     console.log('Time:', Date.now());
     next();
   });
@@ -235,7 +250,7 @@ module.exports = async function(args, subprocess) {
         message: 'server_success',
         data: {
           statusDev: 'working',
-          serverUrl: `${protocol}://${LOCAL_IP}:${PORT}`,
+          serverUrl: urls.lanUrlForBrowser || urls.localUrlForBrowser,
         },
       });
     }

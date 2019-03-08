@@ -3,31 +3,31 @@ const path = require('path');
 const appDirectory = fs.realpathSync(process.cwd());
 const hotDevClientPath = require.resolve('react-dev-utils/webpackHotDevClient');
 
-function entryWithApp(item) {
-  if (typeof item === 'string') {
+function entryWithApp(entry) {
+  if (typeof entry === 'string') {
     // 绝对路径直接返回
-    if (path.isAbsolute(item)) {
-      return item;
+    if (path.isAbsolute(entry)) {
+      return entry;
     }
-    return path.resolve(appDirectory, item);
-  } else if (Array.isArray(item)) {
-    return item.map((file) => entryWithApp(file));
+    return path.resolve(appDirectory, entry);
+  } else if (Array.isArray(entry)) {
+    return entry.map((file) => entryWithApp(file));
   }
 }
 
-function unshiftHotClient(item) {
-  if (typeof item === 'string') {
-    return [hotDevClientPath, item];
-  } else if (Array.isArray(item)) {
-    return [hotDevClientPath, ...item];
+function unshiftEntryChunk(entry, chunk) {
+  if (typeof entry === 'string') {
+    return [chunk, entry];
+  } else if (Array.isArray(entry)) {
+    return [chunk, ...entry];
   }
 }
 
-function entryApplyHotdev(entries) {
+function enhanceEntries(entries, chunk) {
   const hotEntries = {};
 
   Object.keys(entries).forEach((key) => {
-    hotEntries[key] = unshiftHotClient(entries[key]);
+    hotEntries[key] = unshiftEntryChunk(entries[key], chunk);
   });
 
   return hotEntries;
@@ -46,8 +46,13 @@ module.exports = (entry) => {
     });
   }
 
-  if (process.env.NODE_ENV !== 'production') {
-    entries = entryApplyHotdev(entries);
+  if (process.env.NODE_ENV !== 'production' && !process.env.DISABLED_RELOAD) {
+    entries = enhanceEntries(entries, hotDevClientPath);
+  }
+
+  // Note：https://github.com/alibaba/ice/pull/834
+  if (process.env.INJECT_BABEL !== 'runtime') {
+    entries = enhanceEntries(entries, require.resolve('@babel/polyfill'));
   }
 
   return entries;

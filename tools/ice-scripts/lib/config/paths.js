@@ -1,7 +1,6 @@
 const { realpathSync } = require('fs');
 const { resolve } = require('path');
 const url = require('url');
-const pathExists = require('path-exists');
 
 function resolveSDK(relativePath) {
   return resolve(__dirname, relativePath);
@@ -36,31 +35,32 @@ function ensureSlash(path, needsSlash) {
 // It requires a trailing slash, or the file assets will get an incorrect path.
 function getServedPath(appPackageJson) {
   const publicUrl = getPublicUrl(appPackageJson);
+  // publicUrl 不存在的情况下，则使用 homepage 作为部署路径
   const servedUrl = publicUrl ? url.parse(publicUrl).pathname : '/';
   return ensureSlash(servedUrl, true);
 }
 
-module.exports = function getPaths(cwd) {
-  const appDirectory = realpathSync(cwd);
+const appDirectory = realpathSync(process.cwd());
 
-  function resolveApp(relativePath) {
-    return resolve(appDirectory, relativePath);
-  }
+function resolveApp(relativePath) {
+  return resolve(appDirectory, relativePath);
+}
 
-  return {
-    appBuild: resolveApp('build'),
-    appPublic: resolveApp('public'),
-    appHtml: resolveApp('public/index.html'),
-    appFavicon: resolveApp('public/favicon.png'),
-    appFaviconIco: resolveApp('public/favicon.ico'),
-    appPackageJson: resolveApp('package.json'),
-    appAbcJson: resolveApp('abc.json'),
-    appSrc: resolveApp('src'),
-    appNodeModules: resolveApp('node_modules'),
-    sdkNodeModules: resolveSDK('../../node_modules'),
-    publicUrl: getPublicUrl(resolveApp('package.json')),
-    servedPath: getServedPath(resolveApp('package.json')),
-    resolveApp,
-    appDirectory,
-  };
+const isOldKoa = process.env.PROJECT_TYPE == 'node';
+
+module.exports = {
+  appBuild: resolveApp('build') ,
+  appPublic: resolveApp('public') ,
+  appHtml: isOldKoa ? resolveApp('client/index.html') : resolveApp('public/index.html'),
+  appFavicon: isOldKoa ? resolveApp('client/favicon.png') : resolveApp('public/favicon.png'),
+  appFaviconIco: isOldKoa ? resolveApp('client/favicon.ico') : resolveApp('public/favicon.ico'),
+  appPackageJson: resolveApp('package.json'),
+  appAbcJson: resolveApp('abc.json'),
+  appSrc: resolveApp('src'),
+  appNodeModules: resolveApp('node_modules'),
+  sdkNodeModules: resolveSDK('../../node_modules'),
+  publicUrl: getPublicUrl(resolveApp('package.json')),
+  servedPath: getServedPath(resolveApp('package.json')),
+  resolveApp,
+  appDirectory,
 };

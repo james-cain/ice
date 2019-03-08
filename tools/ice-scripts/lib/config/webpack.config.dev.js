@@ -1,30 +1,37 @@
-const webpackMerge = require('webpack-merge');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
+const webpackMerge = require('webpack-merge');
 const webpack = require('webpack');
+
 const getWebpackConfigBasic = require('./webpack.config.basic');
 
-const env = process.env;
+module.exports = function getWebpackConfigDev({ entry, buildConfig = {} }) {
+  const plugins = [];
 
-module.exports = function getWebpackConfigDev(entry, paths, options = {}) {
-  const baseConfig = getWebpackConfigBasic(entry, paths, options);
+  const baseConfig = getWebpackConfigBasic({ entry, buildConfig });
 
-  const plugins = [new webpack.HotModuleReplacementPlugin()];
+  // 热更新
+  if (!process.env.DISABLED_RELOAD) {
+    plugins.push(new webpack.HotModuleReplacementPlugin());
+  }
 
-  if (options.webpackBundleAnalyzer !== false && env.ANALYZER_PORT) {
+  // 依赖分析
+  if (process.env.ANALYZER) {
     plugins.push(
       new BundleAnalyzerPlugin({
         // use a fixed port
         // http://127.0.0.1:$PORT/report.html
-        analyzerPort: env.ANALYZER_PORT,
+        analyzerPort: process.env.ANALYZER_PORT || '9000',
       })
     );
   }
-  // 开发环境下 publicPath 指定为 /build/ 与 webpack server 一致
+
+  // 配置合并
+  // 开发环境下 publicPath 指定为 / 与 webpack server 一致
   return webpackMerge(baseConfig, {
     devtool: 'cheap-module-source-map',
     output: {
-      publicPath: '/build/',
+      publicPath: '/',
     },
     plugins,
   });

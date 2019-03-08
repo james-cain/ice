@@ -1,20 +1,26 @@
-process.env.NODE_ENV = 'production';
-
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const webpackMerge = require('webpack-merge');
+const colors = require('chalk');
 
 const getWebpackConfigBasic = require('./webpack.config.basic');
 
-module.exports = function getWebpackConfigDev(entry, paths, options = {}) {
-  const baseConfig = getWebpackConfigBasic(entry, paths, options);
+module.exports = function getWebpackConfigProd({ entry, buildConfig }) {
+  const baseConfig = getWebpackConfigBasic({ entry, buildConfig });
+
+  console.log(
+    colors.green('Info:'),
+    'process.env.SOURCEMAP',
+    process.env.SOURCEMAP
+  );
 
   return webpackMerge(baseConfig, {
-    devtool: 'none',
+    devtool: process.env.SOURCEMAP || 'none',
     optimization: {
-      minimize: !process.env.BUILD_DEBUG,
+      minimize: !process.env.DEBUG,
       minimizer: [
         new UglifyJsPlugin({
+          sourceMap: process.env.SOURCEMAP && process.env.SOURCEMAP !== 'none',
           cache: true,
           parallel: true,
           uglifyOptions: {
@@ -32,8 +38,9 @@ module.exports = function getWebpackConfigDev(entry, paths, options = {}) {
         }),
         new OptimizeCSSAssetsPlugin({
           cssProcessorOptions: {
+            cssDeclarationSorter: false,
             reduceIdents: false,
-            safe: true
+            parser: require('postcss-safe-parser'),
           },
         }),
       ],

@@ -2,140 +2,99 @@
 // 你可以调整 routerConfig 里的内容
 // 变量名 routerConfig 为 iceworks 检测关键字，请不要修改名称
 
-import HeaderAsideFooterLayout from './layouts/HeaderAsideFooterLayout';
+import UserLogin from './pages/UserLogin';
+import UserRegister from './pages/UserRegister';
 import Dashboard from './pages/Dashboard';
 import Charts from './pages/Charts';
-import Portlets from './pages/Portlets';
+import BaiscCharts from './pages/BaiscCharts';
 import Terms from './pages/Terms';
 import Result from './pages/Result';
-import Fail from './pages/Fail';
-import ServerError from './pages/ServerError';
-import Forbidden from './pages/Forbidden';
-import Empty from './pages/Empty';
-import List from './pages/List';
-import CardList from './pages/CardList';
+import BasicList from './pages/BasicList';
+import ProjectList from './pages/ProjectList';
 import BasicTable from './pages/BasicTable';
-import TableDisplay from './pages/TableDisplay';
-import NotFound from './pages/NotFound';
+import GeneralTable from './pages/GeneralTable';
+import Profile from './pages/Profile';
+import Setting from './pages/Setting';
+import Fail from './pages/Fail';
+import { Empty, Forbidden, NotFound, ServerError } from './pages/Exception';
+import { getRouterData } from './utils/utils';
+import { asideMenuConfig } from './menuConfig';
 
 const routerConfig = [
   {
-    path: '/',
-    layout: HeaderAsideFooterLayout,
+    path: '/dashboard/monitor',
     component: Dashboard,
   },
   {
-    path: '/table',
-    layout: HeaderAsideFooterLayout,
-    component: BasicTable,
-    children: [
-      {
-        path: 'basic-table',
-        layout: HeaderAsideFooterLayout,
-        component: BasicTable,
-      },
-      {
-        path: 'table-display',
-        layout: HeaderAsideFooterLayout,
-        component: TableDisplay,
-      },
-    ],
-  },
-  {
-    path: '/list',
-    layout: HeaderAsideFooterLayout,
-    component: List,
-    children: [
-      {
-        path: 'article-list',
-        layout: HeaderAsideFooterLayout,
-        component: List,
-      },
-      {
-        path: 'card-list',
-        layout: HeaderAsideFooterLayout,
-        component: CardList,
-      },
-    ],
-  },
-  {
-    path: '/exception',
-    layout: HeaderAsideFooterLayout,
-    component: ServerError,
-    children: [
-      {
-        path: '500',
-        layout: HeaderAsideFooterLayout,
-        component: ServerError,
-      },
-      {
-        path: '403',
-        layout: HeaderAsideFooterLayout,
-        component: Forbidden,
-      },
-      {
-        path: '204',
-        layout: HeaderAsideFooterLayout,
-        component: Empty,
-      },
-      {
-        path: '404',
-        layout: HeaderAsideFooterLayout,
-        component: NotFound,
-      },
-    ],
-  },
-  {
-    path: '/result',
-    layout: HeaderAsideFooterLayout,
-    component: Result,
-    children: [
-      {
-        path: 'success',
-        layout: HeaderAsideFooterLayout,
-        component: Result,
-      },
-      {
-        path: 'fail',
-        layout: HeaderAsideFooterLayout,
-        component: Fail,
-      },
-    ],
-  },
-  {
-    path: '/portlets',
-    layout: HeaderAsideFooterLayout,
-    component: Portlets,
-    children: [
-      {
-        path: 'base',
-        layout: HeaderAsideFooterLayout,
-        component: Portlets,
-      },
-      {
-        path: 'terms',
-        layout: HeaderAsideFooterLayout,
-        component: Terms,
-      },
-    ],
-  },
-  {
-    path: '/chart',
-    layout: HeaderAsideFooterLayout,
+    path: '/chart/general',
     component: Charts,
-    children: [
-      {
-        path: 'chart-list',
-        layout: HeaderAsideFooterLayout,
-        component: Charts,
-      },
-    ],
   },
   {
-    path: '*',
-    layout: HeaderAsideFooterLayout,
+    path: '/chart/basic',
+    component: BaiscCharts,
+  },
+  {
+    path: '/list/basic',
+    component: BasicList,
+  },
+  {
+    path: '/list/general',
+    component: ProjectList,
+  },
+  {
+    path: '/result/success',
+    component: Result,
+  },
+  {
+    path: '/result/fail',
+    component: Fail,
+  },
+  {
+    path: '/table/basic',
+    component: BasicTable,
+  },
+  {
+    path: '/profile/basic',
+    component: Profile,
+  },
+  {
+    path: '/profile/general',
+    component: Terms,
+  },
+  {
+    path: '/table/general',
+    component: GeneralTable,
+  },
+  {
+    path: '/account/setting',
+    component: Setting,
+  },
+  {
+    path: '/exception/500',
+    component: ServerError,
+  },
+  {
+    path: '/exception/403',
+    component: Forbidden,
+  },
+  {
+    path: '/exception/204',
+    component: Empty,
+  },
+  {
+    path: '/exception/404',
     component: NotFound,
+  },
+  {
+    path: '/user/login',
+    component: UserLogin,
+  },
+  {
+    path: '/user/register',
+    component: UserRegister,
   },
 ];
 
-export default routerConfig;
+const routerData = getRouterData(routerConfig, asideMenuConfig);
+
+export { routerData };

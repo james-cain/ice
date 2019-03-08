@@ -1,19 +1,19 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import IceContainer from '@icedesign/container';
-import { Checkbox, Button } from '@icedesign/base';
+import { Checkbox, Button, Message } from '@alifd/next';
+import { FormattedMessage } from 'react-intl';
 
-export default class TermsInfo extends Component {
-  static displayName = 'TermsInfo';
-
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+export default class TermsInfo extends PureComponent {
+  handleChange = () => {
+    Message.success('已开通');
+  };
 
   render() {
     return (
       <IceContainer>
-        <h1 style={styles.title}>淘宝达人合作协议</h1>
+        <h1 style={styles.title}>
+          <FormattedMessage id="app.terms.title" />
+        </h1>
 
         <div style={styles.content}>
           <p style={styles.desc}>
@@ -38,17 +38,19 @@ export default class TermsInfo extends Component {
             改、损坏或丢失。例如，在您的浏览器与服务器之间交换数据（如信用卡信息）时受
             SSL（Secure Socket Layer）协议加密保护；
             我们同时对淘宝网网站提供HTTPS（Hyper Text Transfer Protocol over
-            Secure Socket Layer）协议安全浏览方式
+            Secure Socket Layer）协议安全浏览方式。
           </p>
         </div>
 
         <p>
-          <Checkbox>我同意《淘宝达人合作协议》</Checkbox>
+          <Checkbox>
+            <FormattedMessage id="app.terms.hint" />
+          </Checkbox>
         </p>
 
-        <div style={styles.btn}>
-          <Button type="primary" size="large">
-            确认开通
+        <div style={styles.button}>
+          <Button type="primary" onClick={this.handleChange}>
+            <FormattedMessage id="app.terms.btn" />
           </Button>
         </div>
       </IceContainer>
@@ -74,7 +76,7 @@ const styles = {
     padding: '20px 0',
     borderBottom: '1px solid #dedede',
   },
-  btn: {
+  button: {
     textAlign: 'center',
   },
 };

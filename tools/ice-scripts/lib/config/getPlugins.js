@@ -1,18 +1,21 @@
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const colors = require('chalk');
 const ExtractCssAssetsWebpackPlugin = require('extract-css-assets-webpack-plugin');
 const fs = require('fs');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const FilterWarningsPlugin = require('webpack-filter-warnings-plugin');
 const SimpleProgressPlugin = require('webpack-simple-progress-plugin');
 const webpack = require('webpack');
 const WebpackPluginImport = require('webpack-plugin-import');
 
 const AppendStyleWebpackPlugin = require('../plugins/append-style-webpack-plugin');
+const CheckIceComponentsDepsPlugin = require('../plugins/check-ice-components-dep');
 const normalizeEntry = require('../utils/normalizeEntry');
-const getFaviconPath = require('../utils/getFaviconPath');
+const paths = require('./paths');
+const getEntryHtmlPlugins = require('./getEntryHtmlPlugins');
 
-module.exports = function(paths, { buildConfig = {}, themeConfig = {} }) {
+module.exports = ({ buildConfig = {}, themeConfig = {}, entry, pkg = {} }) => {
   const defineVriables = {
     'process.env.NODE_ENV': JSON.stringify(
       process.env.NODE_ENV || 'development'
@@ -25,23 +28,19 @@ module.exports = function(paths, { buildConfig = {}, themeConfig = {} }) {
   }
 
   const plugins = [
-    new HtmlWebpackPlugin({
-      inject: true,
-      templateParameters: {
-        NODE_ENV: process.env.NODE_ENV,
-      },
-      favicon: getFaviconPath([paths.appFaviconIco, paths.appFavicon]),
-      template: paths.appHtml,
-      minify: false,
-    }),
     new webpack.DefinePlugin(defineVriables),
     new MiniCssExtractPlugin({
-      filename: process.env.BUILD_HASH
-        ? 'css/[name].[hash:6].css'
-        : 'css/[name].css',
-      chunkFilename: process.env.BUILD_HASH
+      filename: process.env.HASH ? 'css/[name].[hash:6].css' : 'css/[name].css',
+      chunkFilename: process.env.HASH
         ? 'css/[id].[hash:6].css'
         : 'css/[id].css',
+    }),
+    // FIX ISSUE: https://github.com/webpack-contrib/mini-css-extract-plugin/issues/250
+    new FilterWarningsPlugin({
+      exclude: /Conflicting order between:/,
+    }),
+    new CheckIceComponentsDepsPlugin({
+      pkg
     }),
     new SimpleProgressPlugin(),
     new CaseSensitivePathsPlugin(),
@@ -69,13 +68,18 @@ module.exports = function(paths, { buildConfig = {}, themeConfig = {} }) {
       {
         libraryName: /@alifd\/.*/,
         stylePath: 'style.js',
-      }
+      },
     ]),
   ];
 
-  const localization = buildConfig.localization || false;
+  // 增加 html 输出，支持多页面应用
+  Array.prototype.push.apply(plugins, getEntryHtmlPlugins(entry));
 
-  if (localization) {
+  if (paths.publicUrl === './') {
+    console.log(
+      colors.green('Info:'),
+      '离线化构建项目，自动下载网络资源，请耐心等待'
+    );
     plugins.push(
       new ExtractCssAssetsWebpackPlugin({
         outputPath: 'assets',
@@ -88,6 +92,7 @@ module.exports = function(paths, { buildConfig = {}, themeConfig = {} }) {
   let iconScssPath;
   let skinOverridePath;
   let variableFilePath;
+  let themeNextVersion;
 
   if (themePackage) {
     variableFilePath = path.resolve(
@@ -103,6 +108,8 @@ module.exports = function(paths, { buildConfig = {}, themeConfig = {} }) {
       themePackage,
       'override.scss'
     );
+
+    themeNextVersion = (/^@alif(e|d)\/theme-/.test(themePackage) || themePackage === '@icedesign/theme') ? '1.x' : '0.x';
   }
 
   if (iconScssPath && fs.existsSync(iconScssPath)) {
@@ -110,15 +117,18 @@ module.exports = function(paths, { buildConfig = {}, themeConfig = {} }) {
       type: 'sass',
       srcFile: iconScssPath,
       variableFile: variableFilePath,
+      compileThemeIcon: true,
+      themeNextVersion,
+      pkg,
       distMatch: (chunkName, compilerEntry, compilationPreparedChunks) => {
-        // TODO
         const entriesAndPreparedChunkNames = normalizeEntry(
           compilerEntry,
           compilationPreparedChunks
         );
         // 仅对 css 的 chunk 做 处理
         if (entriesAndPreparedChunkNames.length && /\.css$/.test(chunkName)) {
-          const assetsFromEntry = chunkName.replace(/\.\w+$/, '');
+          // css/index.css -> index
+          const assetsFromEntry = path.basename(chunkName, path.extname(chunkName));
           if (entriesAndPreparedChunkNames.indexOf(assetsFromEntry) !== -1) {
             return true;
           }
@@ -129,16 +139,24 @@ module.exports = function(paths, { buildConfig = {}, themeConfig = {} }) {
     plugins.push(new AppendStyleWebpackPlugin(appendStylePluginOption));
   }
 
+  // HACK 1.x 不会走到这个逻辑
   if (skinOverridePath && fs.existsSync(skinOverridePath)) {
     // eslint-disable-next-line no-console
-    console.log('皮肤 override 文件存在, 添加...');
+    console.log(
+      colors.green('Info:'),
+      '皮肤 override 文件存在',
+      path.join(themePackage, 'override.scss')
+    );
     plugins.push(
       new AppendStyleWebpackPlugin({
         variableFile: variableFilePath,
         appendPosition: 'footer',
-        type: 'sass',
+        // type: 'sass', // 不需要指定 type，与 distMatch 互斥
         srcFile: skinOverridePath,
         distMatch: /\.css/,
+        themeNextVersion,
+        compileThemeIcon: false,
+        pkg
       })
     );
   }

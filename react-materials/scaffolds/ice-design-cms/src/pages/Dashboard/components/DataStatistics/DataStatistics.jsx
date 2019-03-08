@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Grid } from '@icedesign/base';
+import { Grid } from '@alifd/next';
 import IceContainer from '@icedesign/container';
 import { Chart, Axis, Geom, Tooltip } from 'bizcharts';
-import './DataStatistics.scss';
+import styles from './index.module.scss';
 
 const { Row, Col } = Grid;
 
@@ -97,91 +97,49 @@ export default class DataStatistics extends Component {
     };
 
     return (
-      <div className="data-statistics">
-        <IceContainer>
-          <h4 style={styles.title}>用户活跃趋势</h4>
-          <Row wrap>
-            <Col xxs="24" l="16">
-              <Chart
-                height={300}
-                padding={[40, 10, 40, 35]}
-                data={dataSource.chartData}
-                scale={cols}
-                forceFit
-              >
-                <Axis name="month" />
-                <Axis name="value" />
-                <Tooltip crosshairs={{ type: 'y' }} />
-                <Geom type="interval" position="month*users" />
-              </Chart>
-            </Col>
-            <Col xxs="24" l="8">
-              <ul style={styles.items}>
-                {dataSource.statisticData.map((item, index) => {
-                  return (
-                    <li key={index} className="item-box" style={styles.itemBox}>
-                      <div style={styles.itemIcon}>
-                        <img
-                          src={item.img.url}
-                          style={{
-                            width: item.img.width,
-                            height: item.img.height,
-                          }}
-                          alt=""
-                        />
-                      </div>
-                      <div style={styles.itemText}>
-                        <div style={styles.name}>{item.name}</div>
-                        <div style={styles.value}>{item.value}</div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </Col>
-          </Row>
-        </IceContainer>
-      </div>
+      <IceContainer>
+        <h4 className={styles.title}>用户活跃趋势</h4>
+        <Row wrap>
+          <Col xxs="24" l="16">
+            <Chart
+              height={300}
+              padding={[40, 10, 40, 35]}
+              data={dataSource.chartData}
+              scale={cols}
+              forceFit
+            >
+              <Axis name="month" />
+              <Axis name="value" />
+              <Tooltip crosshairs={{ type: 'y' }} />
+              <Geom type="interval" position="month*users" />
+            </Chart>
+          </Col>
+          <Col xxs="24" l="8">
+            <ul className={styles.items}>
+              {dataSource.statisticData.map((item, index) => {
+                return (
+                  <li key={index} className={styles.itemBox}>
+                    <div className={styles.itemIcon}>
+                      <img
+                        src={item.img.url}
+                        style={{
+                          width: item.img.width,
+                          height: item.img.height,
+                        }}
+                        alt=""
+                      />
+                    </div>
+                    <div className={styles.itemText}>
+                      <div className={styles.name}>{item.name}</div>
+                      <div className={styles.value}>{item.value}</div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </Col>
+        </Row>
+      </IceContainer>
     );
   }
 }
-
-const styles = {
-  container: {
-    width: '100%',
-  },
-  title: {
-    margin: 0,
-    fontSize: '16px',
-    paddingBottom: '15px',
-    fontWeight: 'bold',
-    color: '#333',
-    borderBottom: '1px solid #eee',
-  },
-  items: {
-    display: 'flex',
-    flexDeriction: 'row',
-    flexWrap: 'wrap',
-    marginLeft: '30px',
-  },
-  itemBox: {
-    display: 'flex',
-    flexDirection: 'row',
-    width: '50%',
-    marginTop: '50px',
-    alignItems: 'center',
-  },
-  itemIcon: {
-    marginRight: '10px',
-  },
-  icon: {
-    color: '#3FA1FF',
-  },
-  value: {
-    color: '#1F82FF',
-    fontSize: '20px',
-  },
-  name: {
-    fontSize: '12px',
-  },
-};

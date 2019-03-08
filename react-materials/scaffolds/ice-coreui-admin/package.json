@@ -1,18 +1,18 @@
 {
   "name": "@icedesign/coreui-admin-template",
-  "version": "1.0.4",
-  "description": "该模板基于社区的 CoreUI 改造而成，支持 CoreUI 的所有功能，同时也支持飞冰基础组件和区块的使用， 支持 Iceworks 一键创建项目和完整的 GUI 操作",
+  "version": "2.0.0",
+  "description": "该模板基于社区的 CoreUI 改造而成，使用 react-scripts 构建，支持 CoreUI 的所有功能，同时也支持飞冰基础组件和区块的使用， 支持 Iceworks 一键创建项目和完整的 GUI 操作",
   "homepage": "https://alibaba.github.io/ice/scaffold-preview/ice-coreui-admin/index.html",
   "license": "MIT",
   "keywords": [
     "ice-scaffold"
   ],
   "dependencies": {
+    "@alifd/next": "^1.x",
     "@coreui/coreui": "^2.0.4",
     "@coreui/coreui-plugin-chartjs-custom-tooltips": "^1.2.0",
     "@coreui/icons": "0.2.0",
     "@coreui/react": "^2.0.4",
-    "@icedesign/base": "^0.2.3",
     "bootstrap": "^4.1.1",
     "chart.js": "^2.7.2",
     "classnames": "^2.2.6",
@@ -21,6 +21,7 @@
     "enzyme-adapter-react-16": "^1.1.1",
     "flag-icon-css": "^3.0.0",
     "font-awesome": "^4.7.0",
+    "moment": "^2.23.0",
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-chartjs-2": "^2.7.2",
@@ -34,6 +35,7 @@
     "babel-eslint": "^8.0.3",
     "babel-jest": "^23.0.1",
     "babel-plugin-import": "^1.8.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.5",
     "eslint": "^4.13.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-babel": "^4.1.1",
@@ -71,8 +73,14 @@
   },
   "scaffoldConfig": {
     "type": "react",
-    "name": "ice-coreui-admin",
-    "title": "ICE CoreUI Admin",
+    "name": "coreui-admin",
+    "title": "CoreUI Admin",
+    "categories": [
+      "社区模板"
+    ],
     "screenshot": "https://img.alicdn.com/tfs/TB1hoK.ETtYBeNjy1XdXXXXyVXa-2840-1596.png"
+  },
+  "engines": {
+    "node": ">=8.0.0"
   }
 }

@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import { Grid } from '@icedesign/base';
+import { Grid } from '@alifd/next';
 import IceContainer from '@icedesign/container';
+import { injectIntl } from 'react-intl';
 import { Chart, Coord, Geom, Tooltip, Axis, Legend } from 'bizcharts';
 import DataSet from '@antv/data-set';
 
 const { Row, Col } = Grid;
 const { DataView } = DataSet;
 
+@injectIntl
 export default class PieDoughnutChart extends Component {
   static displayName = 'PieDoughnutChart';
 
@@ -49,11 +51,18 @@ export default class PieDoughnutChart extends Component {
       },
     };
 
+    const {
+      intl: { formatMessage },
+    } = this.props;
+
     return (
       <div className="pie-doughnut-chart">
         <Row wrap gutter="20">
           <Col xxs="24" s="24" l="12">
-            <IceContainer title="性别占比" style={styles.leftContainer}>
+            <IceContainer
+              title={formatMessage({ id: 'app.dashboard.gender.share' })}
+              style={styles.leftContainer}
+            >
               <Chart
                 width={450}
                 height={300}
@@ -64,17 +73,20 @@ export default class PieDoughnutChart extends Component {
               >
                 <Coord type="theta" radius={0.75} />
                 <Axis name="percent" />
-                <Legend position="bottom" offsetY={-60} />
+                <Legend position="bottom" offsetY={-20} />
                 <Tooltip
                   showTitle={false}
-                  itemTpl="<li><span style=&quot;background-color:{color};&quot; class=&quot;g2-tooltip-marker&quot;></span>{name}: {value}</li>"
+                  itemTpl='<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>'
                 />
                 <Geom type="intervalStack" position="percent" color="genre" />
               </Chart>
             </IceContainer>
           </Col>
           <Col xxs="24" s="24" l="12">
-            <IceContainer title="年龄分布" style={styles.rightContainer}>
+            <IceContainer
+              title={formatMessage({ id: 'app.dashboard.age.distribution' })}
+              style={styles.rightContainer}
+            >
               <Chart
                 style={styles.chart}
                 width={450}
@@ -86,10 +98,10 @@ export default class PieDoughnutChart extends Component {
               >
                 <Coord type="theta" radius={0.75} />
                 <Axis name="percent" />
-                <Legend position="bottom" offsetY={-60} />
+                <Legend position="bottom" offsetY={-20} />
                 <Tooltip
                   showTitle={false}
-                  itemTpl="<li><span style=&quot;background-color:{color};&quot; class=&quot;g2-tooltip-marker&quot;></span>{name}: {value}</li>"
+                  itemTpl='<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>'
                 />
                 <Geom type="intervalStack" position="percent" color="genre" />
               </Chart>
